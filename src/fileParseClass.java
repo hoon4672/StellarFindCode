@@ -4,7 +4,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.TreeMap;
 
 public class fileParseClass {
@@ -25,6 +24,7 @@ public class fileParseClass {
 		try {
 			addFile();
 			String oldFileName = "";
+			//File file = new File("D:\\문서\\Stellar_TestCASE.doc");
 			File file = new File("D:\\문서\\Stellar_TestCASE.txt");
 			
 			if(file.exists()){
@@ -82,6 +82,7 @@ public class fileParseClass {
 	                }
 	                lineNumber++;
 	            }
+	            fileWrite.flush();
 	            fileWrite.close();
 	            bfRIn.close();
 	        }
