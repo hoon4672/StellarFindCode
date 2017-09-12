@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -38,7 +39,9 @@ public class fileParseClass {
 				String key = iteratorKey.next();
 				
 	            BufferedReader bfRIn = new BufferedReader(new FileReader(treeMap.get(key).toString()));
-	            FileWriter fileWrite = new FileWriter(file,true);	
+	            //FileWriter fileWrite = new FileWriter(file,true);	
+	            BufferedWriter out = new BufferedWriter(new FileWriter(file,true));
+	            
 	            
 	            String directoryNameIndex = new String(key);
 	            int directoryIndex = directoryNameIndex.lastIndexOf("_");
@@ -47,43 +50,91 @@ public class fileParseClass {
 	            String fileName = new String(treeMap.get(key));
 	            int fileIndex = fileName.lastIndexOf(File.separator);
 	            
-	            System.out.println( String.format("키 : %s, 값 : %s", directoryName, treeMap.get(key)) );
+	           // System.out.println( String.format("키 : %s, 값 : %s", directoryName, treeMap.get(key)) );
 	            
             	if(oldFileName.equals(directoryName)){
             		//System.out.println("OLD DirectoryName    : "+oldFileName +"     Now DirectoryName : "+key.toString()+"\n");
             	}else{   
             		if(oldFileName == ""){
-            			fileWrite.write("###### Directory Name : "+directoryName+" ######");
+            			
             		}else{
-            			fileWrite.write("\n\n"+"###### Directory Name : "+directoryName+" ######");
+            			out.newLine();
+            			out.newLine();            			
             		}
-            		
+            		out.write("###### Directory Name : "+directoryName+" ######");
             		oldFileName = directoryName;
             	}
             	
-            	fileWrite.write("\n*** File Name : "+fileName.substring(fileIndex+1, fileName.length())+"*** \n");
+            	out.newLine();	
+            	out.write("*** File Name : "+fileName.substring(fileIndex+1, fileName.length())+"***");
+            	out.newLine();
 	            
 	            
-	            String fileStr;	            
+            	boolean lineEndB = false;
+            	String fileStr;	            
+	            String lineAddStr = "";
+	            int lineEndIndex = 0;
 	            int lineNumber  = 1;
 	            while ((fileStr = bfRIn.readLine()) != null) {
 	            	
+	            	if(lineEndB == true){
+	            		
+                		if(fileStr.endsWith(")")){
+                			int lastIndexOfStr = lineAddStr.lastIndexOf("\"");
+                			int newIndexOfStr = fileStr.indexOf("\"");
+    	                	out.write("Line Number : "+lineEndIndex+"  "+lineAddStr.substring(0, (lastIndexOfStr > 0) ? lastIndexOfStr : lineAddStr.length())+" "+fileStr.substring((newIndexOfStr > 0) ? newIndexOfStr : 0,fileStr.length()));
+    	                	//out.write("Line Number : "+lineEndIndex+"  \""+lineAddStr.replaceAll("\"", "")+" "+newFileStr.substring(1,newFileStr.length()));
+                    		out.newLine();
+                			lineEndB 		= false;
+            	            lineAddStr 		= "";
+            	            lineEndIndex 	= 0;	                		
+                		}else{
+                			lineAddStr += fileStr.replaceAll("\"", "");
+                			
+                		}
+                		
+	                }
+	            	
 	               // System.out.println(fileStr);
 	                if(fileStr.contains("TEST_CASE")){
-	                	fileWrite.write("Line Number : "+lineNumber+"  "+fileStr+"\n");
+	                	if(fileStr.endsWith(")"))	                	{
+	                		out.write("Line Number : "+lineNumber+"  "+fileStr);
+	                		out.newLine();
+	                	}else{
+	                		lineEndIndex = lineNumber;
+	                		lineAddStr += fileStr;
+	                		lineEndB = true;
+	                	}	                
 	                }
 	                
 	                if(fileStr.contains("TEST_CASE_METHOD")){
-	                	fileWrite.write("Line Number : "+lineNumber+"  "+fileStr+"\n");
+	                	if(fileStr.endsWith(")"))
+	                	{
+		                	out.write("Line Number : "+lineNumber+"  "+fileStr);
+		                	out.newLine();
+	                	}else {
+	                		lineEndIndex = lineNumber;
+	                		lineAddStr += fileStr;
+	                		lineEndB = true;
+	                	}
 	                }
 	                
 	                if(fileStr.contains("SECTION")){
-	                	fileWrite.write("       "+"Line Number : "+lineNumber+"  "+fileStr+"\n");
+	                	if(fileStr.endsWith(")")){
+	                	out.write("Line Number : "+lineNumber+"  "+fileStr);
+	                	out.newLine();
+		                }else {
+	                		lineEndIndex = lineNumber;
+	                		lineAddStr += fileStr;
+	                		lineEndB = true;
+	                	}
 	                }
+	                
+	                
+	                
 	                lineNumber++;
 	            }
-	            fileWrite.flush();
-	            fileWrite.close();
+	            out.close();
 	            bfRIn.close();
 	        }
 			
